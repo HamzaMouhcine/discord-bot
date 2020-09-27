@@ -1,9 +1,12 @@
 const Discord = require("discord.js");
 const config = require("./config.json");
+const unirest = require("unirest");
 
 const client = new Discord.Client();
 
 const prefix = ":";
+
+
 
 client.on("message", function(message) {
   if (message.author.bot) return;
@@ -12,17 +15,43 @@ client.on("message", function(message) {
   const commandBody = message.content.slice(prefix.length);
   const args = commandBody.split(' ');
   const command = args.shift().toLowerCase();
+  const line = message.content.slice(prefix.length+command.length+" ");
 
   if (command === "ping") {
     const timeTaken = Date.now() - message.createdTimestamp;
     message.reply(`Pong! This message had a latency of ${timeTaken}ms.`);
+  } else if (command === "translate") {
+    var req = unirest("POST", "https://microsoft-translator-text.p.rapidapi.com/translate");
+
+    req.query({
+      "profanityAction": "NoAction",
+      "textType": "plain",
+      "to": "fr",
+      "api-version": "3.0"
+    });
+
+    req.headers({
+      "x-rapidapi-host": "microsoft-translator-text.p.rapidapi.com",
+      "x-rapidapi-key": "78a9426abfmsh61f931729fbdc0cp1fa633jsn5091cc4ef462",
+      "content-type": "application/json",
+      "accept": "application/json",
+      "useQueryString": true
+    });
+
+    req.type("json");
+    req.send([
+      {
+        "Text": line
+      }
+    ]);
+
+    req.end(function (res) {
+      if (res.error) console.log(res.error);
+      console.log(res.body[0].translations[0].text);
+      message.reply(res.body[0].translations[0].text);
+    });
   }
 
-  else if (command === "sum") {
-    const numArgs = args.map(x => parseFloat(x));
-    const sum = numArgs.reduce((counter, x) => counter += x);
-    message.reply(`The sum of all the arguments you provided is ${sum}!`);
-  }
 });
 
 client.login(config.BOT_TOKEN);

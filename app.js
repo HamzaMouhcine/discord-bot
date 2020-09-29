@@ -20,6 +20,7 @@ client.on("message", function(message) {
   if (command === "ping") {
     const timeTaken = Date.now() - message.createdTimestamp;
     message.reply(`Pong! This message had a latency of ${timeTaken}ms.`);
+
   } else if (command === "translate") {
     var req = unirest("POST", "https://microsoft-translator-text.p.rapidapi.com/translate");
 
@@ -49,6 +50,29 @@ client.on("message", function(message) {
       if (res.error) console.log(res.error);
       console.log(res.body[0].translations[0].text);
       message.reply(res.body[0].translations[0].text);
+    });
+  } else if (command === "codes") {
+    var req = unirest("GET", "https://microsoft-translator-text.p.rapidapi.com/languages");
+
+    req.query({
+      "api-version": "3.0"
+    });
+
+    req.headers({
+      "x-rapidapi-host": "microsoft-translator-text.p.rapidapi.com",
+      "x-rapidapi-key": "78a9426abfmsh61f931729fbdc0cp1fa633jsn5091cc4ef462",
+      "useQueryString": true
+    });
+
+
+    req.end(function (res) {
+      if (res.error) throw new Error(res.error);
+      let s = "";
+      for (const property in res.body.translation) {
+        console.log(property+" hellooeee "+res.body.translation[property].name);
+        s = s+res.body.translation[property].name+": "+property+"\n";
+      }
+      message.reply(s);
     });
   }
 

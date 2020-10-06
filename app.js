@@ -1,6 +1,8 @@
 const Discord = require("discord.js");
 const config = require("./config.json");
 const unirest = require("unirest");
+const User = require('./models/user');
+const mongoose = require('mongoose');
 
 const client = new Discord.Client();
 
@@ -17,7 +19,41 @@ client.on("message", function(message) {
   const command = args.shift().toLowerCase();
   let line = message.content.slice(prefix.length+command.length+1);
 
-  if (command === "ping") {
+  if (command === "create") {
+  	User.findOne({ id: message.author.id }, (err, user) => {
+      if (err) return message.reply('error');
+      if (user) return message.reply('You already have an account!');
+      let newUser = new User({
+        id: message.author.id
+      });
+      newUser.save();
+      console.log("newUser: "+newUser);
+      return message.reply('You have created an account!');
+    });
+  } else if (command === "name") {
+  	User.findOne({ id: message.author.id }, (err, user) => {
+      if (err) return message.reply('error');
+      if (!user) return message.reply('Create an account first.');
+      console.log(user);
+      return message.reply('Your name is '+user.name());
+    });
+  } else if (command === "setname") {
+  	let newName = args[0];
+    User.findOne({ id: message.author.id }, (err, user) => {
+      if (err) return message.reply("error");
+      if (!user) return message.reply("Create an account first.");
+      user.displayname = newName;
+      user.save();
+      console.log(user);
+      message.reply("Your name is set to "+user.name());
+    });
+  } else if (command === "delete") {
+  	User.deleteOne({ id: message.author.id }, (err, done) => {
+      if (err) return message.reply('error');
+      if (done.deletedCount == 1) return message.reply('Account deleted');
+      else return message.reply("You don't have an account.");
+    });
+  } else if (command === "ping") {
     const timeTaken = Date.now() - message.createdTimestamp;
     message.reply(`Pong! This message had a latency of ${timeTaken}ms.`);
 
@@ -46,7 +82,7 @@ client.on("message", function(message) {
     });
   } else {
     var req = unirest("POST", "https://microsoft-translator-text.p.rapidapi.com/translate");
-
+    console.log("hello, I'm here");
     let from = "",
         to = command;
 
@@ -91,4 +127,11 @@ client.on("message", function(message) {
 
 });
 
+
 client.login(config.BOT_TOKEN);
+mongoose.connect('mongodb://localhost/discord-bot', {
+	useNewUrlParser: true,
+	useUnifiedTopology: true
+}, () => {
+  console.log("connected to db.");
+}); 

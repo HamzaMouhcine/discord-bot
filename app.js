@@ -135,6 +135,9 @@ client.on("message", function(message) {
       "useQueryString": true
     });
 
+    const Embed = new Discord.MessageEmbed().setColor('#0099ff')
+                                            .setTitle('Some title');
+
 
     req.end(function (res) {
       if (res.error) throw new Error(res.error);
@@ -142,10 +145,12 @@ client.on("message", function(message) {
       let test = "";
       for (const property in res.body.translation) {
         s = s+res.body.translation[property].name+": "+property+"\n";
+        Embed.addField(res.body.translation[property].name, property);
         test = test+", \""+property+"\"";
       }
-      message.reply(s);
-      return message.reply(test);
+      message.channel.send(s);
+      message.channel.send(Embed);
+      return;
     });
 
 
@@ -166,6 +171,23 @@ client.on("message", function(message) {
         user.auto.on = false;
         user.save();
         return false;
+      } else if (args[0] === "status") {
+        let status = "";
+        status = "gobal: "+user.auto.global+"\n";
+        for (let channel in user.auto.channels) {
+          let channelId = channel.slice(2).slice(0, -1);
+          let channelName = client.channels.cache.find(c => c.id === channelId).name;
+          console.log(channelName);
+          status = status+channelName+": "+user.auto.channels[channel]+"\n";
+        }
+        return message.reply(status);
+      } else if (args[0] === "reset") {
+        user.auto.on = false;
+        user.auto.global = [];
+        user.auto.channels = {};
+        user.markModified('auto');
+        user.save();
+        return;
       } else if (args[0] === "add") {
         console.log("entered add");
         let all = true,

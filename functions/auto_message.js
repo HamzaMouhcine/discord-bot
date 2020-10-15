@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const unirest = require('unirest');
 const User = require('./../models/user.js');
 
@@ -45,10 +46,14 @@ module.exports = (message) => {
         ]);
 
         req.end(function (res) {
-          if (res.error || res.body[0] === undefined) message.reply('Something went wrong, Please try again.');
-          else {
-            message.reply(res.body[0].translations[0].text);
-          }
+          if (res.error || res.body[0] === undefined) return message.reply('Something went wrong, Please try again.');
+
+          const Embed = new Discord.MessageEmbed()
+          .setColor('#0099ff')
+          .setTitle('to '+to+":")
+          .setDescription(res.body[0].translations[0].text);
+
+          message.channel.send(Embed);
         });
       });
     });

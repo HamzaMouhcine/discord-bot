@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const unirest = require('unirest');
 const prefix = "t:";
 
@@ -38,8 +39,12 @@ module.exports = (message, args, command) => {
 
     req.end(function (res) {
       if (res.error || res.body[0] == undefined) return message.reply('Something went wrong, Please try again.');
-      else {
-        return message.reply(res.body[0].translations[0].text);
-      }
+
+      const Embed = new Discord.MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle('to '+to+":")
+      .setDescription(res.body[0].translations[0].text);
+
+      message.channel.send(Embed);
     });
 }

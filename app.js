@@ -11,7 +11,7 @@ const auto_command = require('./commands/auto.js');
 const auto_message = require('./functions/auto_message.js');
 const createUserAccount = require('./functions/createUser.js');
 const translate = require('./functions/translate.js');
-
+const Pagination = require('discord-paginationembed');
 const client = new Discord.Client();
 
 const prefix = "t:";
@@ -31,11 +31,11 @@ client.on("message", function(message) {
   const command = args.shift().toLowerCase();
 
   if (command === "codes") {
-      return codes_command(message);
+    return codes_command(message);
   } else if (command === "auto") {
-      return auto_command(client, message, args);
+    return auto_command(client, message, args);
   } else {
-      return translate(message, args, command);
+    return translate(message, args, command);
   }
 
 });

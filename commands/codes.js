@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const unirest = require("unirest");
+const Pagination = require('discord-paginationembed');
 
 module.exports = (message) => { 
     var req = unirest("GET", "https://microsoft-translator-text.p.rapidapi.com/languages");
@@ -14,19 +15,28 @@ module.exports = (message) => {
       "useQueryString": true
     });
 
-    const Embed = new Discord.MessageEmbed().setColor('#0099ff')
-                                            .setTitle('Some title');
-
-
     req.end(function (res) {
       if (res.error) throw new Error(res.error);
-      let s = "";
+      let codes = [];
       for (const property in res.body.translation) {
-        s = s+res.body.translation[property].name+": "+property+"\n";
-        Embed.addField(res.body.translation[property].name, property);
+        codes.push({
+          code: property,
+          name: res.body.translation[property].name
+        });
       }
-      message.channel.send(s);
-      message.channel.send(Embed);
-      return;
+
+      const FieldsEmbed = new Pagination.FieldsEmbed()
+      .setArray(codes)
+      .setAuthorizedUsers([message.author.id])
+      .setChannel(message.channel)
+      .setElementsPerPage(10)
+      .setPageIndicator(true)
+      .setDisabledNavigationEmojis(['jump'])
+      .formatField("Commands List:",elm => elm.name+": **"+elm.code+"**");
+
+      FieldsEmbed.embed
+        .setColor(0x00FFFF);
+
+      FieldsEmbed.build();
     });
 }

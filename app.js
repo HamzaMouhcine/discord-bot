@@ -16,10 +16,10 @@ const client = new Discord.Client();
 
 const prefix = "t:";
 
-client.on("message", function(message) {
+client.on("message", async function(message) {
   if (message.author.bot) return;
 
-  createUserAccount(message);
+  let userExists = await createUserAccount(message);
 
   if (!message.content.startsWith(prefix)) {
     return auto_message(message);
@@ -37,7 +37,6 @@ client.on("message", function(message) {
   } else {
     return translate(message, args, command);
   }
-
 });
 
 

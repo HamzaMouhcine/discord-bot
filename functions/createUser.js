@@ -1,19 +1,19 @@
 const User = require('./../models/user.js');
 
-module.exports = async (message) => {
-    return await User.findOne({ id: message.author.id }, (err, user) => {
+module.exports = (message) => new Promise((resolve, reject) => {
+    User.findOne({ id: message.author.id }, (err, user) => {
       if (err) {
       	message.reply('error');
-      	return "error";
+      	return reject(err);
       }
       if (user) {
-      	return "user exists";
+      	return resolve (user);
       }
 
       let newUser = new User({
         id: message.author.id
       });
       newUser.save();
-      return "new user created";
+      return resolve(newUser);
     });
-};
+});

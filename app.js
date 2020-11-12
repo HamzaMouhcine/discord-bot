@@ -19,7 +19,11 @@ const prefix = "t:";
 client.on("message", async function(message) {
   if (message.author.bot) return;
 
-  let userExists = await createUserAccount(message);
+  try {
+    let userExists = await createUserAccount(message);
+  } catch(err) {
+    console.log(err);
+  }
 
   if (!message.content.startsWith(prefix)) {
     return auto_message(message);

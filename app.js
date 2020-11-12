@@ -21,25 +21,26 @@ client.on("message", async function(message) {
 
   try {
     let userExists = await createUserAccount(message);
+
+    if (!message.content.startsWith(prefix)) {
+      return auto_message(message);
+    }
+
+    const reg = new RegExp(" +");
+    const commandBody = message.content.slice(prefix.length);
+    const args = commandBody.trim().split(reg);
+    const command = args.shift().toLowerCase();
+
+    if (command === "codes") {
+      return codes_command(message);
+    } else if (command === "auto") {
+      return auto_command(client, message, args);
+    } else {
+      return translate(message, args, command);
+    }
+    
   } catch(err) {
     console.log(err);
-  }
-
-  if (!message.content.startsWith(prefix)) {
-    return auto_message(message);
-  }
-
-  const reg = new RegExp(" +");
-  const commandBody = message.content.slice(prefix.length);
-  const args = commandBody.trim().split(reg);
-  const command = args.shift().toLowerCase();
-
-  if (command === "codes") {
-    return codes_command(message);
-  } else if (command === "auto") {
-    return auto_command(client, message, args);
-  } else {
-    return translate(message, args, command);
   }
 });
 
